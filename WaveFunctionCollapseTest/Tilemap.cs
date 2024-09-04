@@ -47,7 +47,7 @@ public class Tilemap : Transformable, Drawable
 
         _rectangleShape = new RectangleShape((Vector2f)_textureTileSize)
         {
-            FillColor = new Color(200, 0, 200, 50),
+            FillColor = new Color(200, 0, 200, 30),
             OutlineColor = Color.Red,
             OutlineThickness = -1
         };
@@ -133,8 +133,8 @@ public class Tilemap : Transformable, Drawable
 
         target.Draw(_vertexArray, states);
 
-        if (_lowestEntropySortedTiles[0] == tile)
-            target.Draw(_rectangleShape, states);
+        _rectangleShape.OutlineThickness = _lowestEntropySortedTiles[0] == tile ? -1 : 0;
+        target.Draw(_rectangleShape, states);
 
         _text.DisplayedString = tile.PossibleStates.Count.ToString();
         target.Draw(_text, states);
