@@ -58,8 +58,6 @@ public class Tilemap : Transformable, Drawable
         if (_lowestEntropySortedTiles is [])
             return;
 
-        _lowestEntropySortedTiles.Sort((a, b) => a.Entropy.CompareTo(b.Entropy));
-
         Tile tileToCollapse = _lowestEntropySortedTiles[0];
 
         Neighbors collapsedTileNeighbors = GetNeighbors(tileToCollapse.Position);
@@ -70,6 +68,7 @@ public class Tilemap : Transformable, Drawable
         }
 
         _lowestEntropySortedTiles.Remove(tileToCollapse);
+        _lowestEntropySortedTiles.Sort((a, b) => a.Entropy.CompareTo(b.Entropy));
     }
 
     public void Draw(RenderTarget target, RenderStates states)
@@ -91,8 +90,17 @@ public class Tilemap : Transformable, Drawable
                 }
                 else
                 {
-                    byte entropyColor = (byte)((byte)(Lerp(1.0f / tile.Entropy, 0, 150)));
-                    _rectangleShape.FillColor = new Color(entropyColor, entropyColor, entropyColor);
+                    if (_lowestEntropySortedTiles[0] == tile)
+                    {
+                        _rectangleShape.FillColor = new Color(150, 0, 0);
+                    }
+                    else
+                    {
+                        byte entropyColor = (byte)(Lerp(1.0f / tile.Entropy, 0, 150));
+                        _rectangleShape.FillColor = new Color(entropyColor, entropyColor, entropyColor);
+                    }
+
+
                     target.Draw(_rectangleShape, rs);
 
                     _text.DisplayedString = tile.PossibleStates.Count.ToString();
