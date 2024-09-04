@@ -8,6 +8,8 @@ public class Tilemap : Transformable, Drawable
     private readonly Texture _texture;
     private readonly Vector2u _atlasSize;
     private readonly Vector2u _gridSize;
+    private readonly Clock _clock;
+
     private readonly VertexArray _vertexArray;
     private readonly Vector2u _textureTileSize;
 
@@ -20,11 +22,13 @@ public class Tilemap : Transformable, Drawable
 
     private readonly List<Tile> _lowestEntropySortedTiles = [];
 
-    public Tilemap(Texture texture, Vector2u atlasSize, Vector2u gridSize)
+    public Tilemap(Texture texture, Vector2u atlasSize, Vector2u gridSize, Clock clock)
     {
         _texture = texture;
         _atlasSize = atlasSize;
         _gridSize = gridSize;
+        _clock = clock;
+
         _vertexArray = new VertexArray(PrimitiveType.Quads, 4);
 
         _textureTileSize = new Vector2u(_texture.Size.X / atlasSize.X, _texture.Size.Y / atlasSize.Y);
@@ -48,7 +52,7 @@ public class Tilemap : Transformable, Drawable
 
         _text = new Text("", _font)
         {
-            CharacterSize = 10,
+            CharacterSize = 8,
             Origin = new Vector2f(-4, -1)
         };
     }
@@ -61,7 +65,7 @@ public class Tilemap : Transformable, Drawable
         Tile tileToCollapse = _lowestEntropySortedTiles[0];
 
         Neighbors collapsedTileNeighbors = GetNeighbors(tileToCollapse.Position);
-        tileToCollapse.Collapse(collapsedTileNeighbors);
+        tileToCollapse.Collapse();
         foreach (Tile? neighbor in collapsedTileNeighbors)
         {
             neighbor?.Update(GetNeighbors(neighbor.Position));
@@ -85,27 +89,9 @@ public class Tilemap : Transformable, Drawable
                 rs.Transform.Translate(new Vector2f(x * _textureTileSize.X, y * _textureTileSize.Y) - (fullSize / 2.0f));
 
                 if (tile.IsCollapsed)
-                {
                     DrawTile(tile, target, rs);
-                }
                 else
-                {
-                    if (_lowestEntropySortedTiles[0] == tile)
-                    {
-                        _rectangleShape.FillColor = new Color(150, 0, 0);
-                    }
-                    else
-                    {
-                        byte entropyColor = (byte)(Lerp(1.0f / tile.Entropy, 0, 150));
-                        _rectangleShape.FillColor = new Color(entropyColor, entropyColor, entropyColor);
-                    }
-
-
-                    target.Draw(_rectangleShape, rs);
-
-                    _text.DisplayedString = tile.PossibleStates.Count.ToString();
-                    target.Draw(_text, rs);
-                }
+                    DrawPossibility(tile, target, rs);
             }
         }
     }
@@ -124,6 +110,37 @@ public class Tilemap : Transformable, Drawable
         states.Texture = _texture;
 
         target.Draw(_vertexArray, states);
+    }
+
+    public void DrawPossibility(Tile tile, RenderTarget target, RenderStates states)
+    {
+        if (tile.IsCollapsed)
+            throw new Exception("Can't draw collapsed tile as a possibility");
+
+        float ratio = (_clock.ElapsedTime.AsSeconds() * 1.5f) % 1;
+
+        TileState? currentlyShownState = tile.GetCollapsedState(ratio) ?? throw new Exception("Invalid state");
+        Vector2f textureCoord = new(currentlyShownState.TextureCoord.X * _textureTileSize.X, currentlyShownState.TextureCoord.Y * _textureTileSize.Y);
+
+        _vertexArray[0] = new Vertex(new Vector2f(_textureTileSize.X, 0), textureCoord + new Vector2f(_textureTileSize.X, 0));
+        _vertexArray[1] = new Vertex(new Vector2f(0, 0), textureCoord + new Vector2f(0, 0));
+        _vertexArray[2] = new Vertex(new Vector2f(0, _textureTileSize.Y), textureCoord + new Vector2f(0, _textureTileSize.Y));
+        _vertexArray[3] = new Vertex(new Vector2f(_textureTileSize.X, _textureTileSize.Y), textureCoord + new Vector2f(_textureTileSize.X, _textureTileSize.Y));
+        states.Texture = _texture;
+
+        target.Draw(_vertexArray, states);
+
+        Color overlay = new(200, 0, 200, 100);
+        _vertexArray[0] = new Vertex(new Vector2f(_textureTileSize.X, 0), overlay);
+        _vertexArray[1] = new Vertex(new Vector2f(0, 0), overlay);
+        _vertexArray[2] = new Vertex(new Vector2f(0, _textureTileSize.Y), overlay);
+        _vertexArray[3] = new Vertex(new Vector2f(_textureTileSize.X, _textureTileSize.Y), overlay);
+        states.Texture = null;
+
+        target.Draw(_vertexArray, states);
+
+        _text.DisplayedString = tile.PossibleStates.Count.ToString();
+        target.Draw(_text, states);
     }
 
     private Neighbors GetNeighbors(Vector2u position)

@@ -80,22 +80,29 @@ public class Tile
         UpdateEntropy();
     }
 
-    public bool Collapse(Neighbors neighbors)
+    public bool Collapse()
+    {
+        TileState? state = GetCollapsedState((float)Random.Shared.NextDouble());
+        CollapsedState = state;
+
+        return state != null;
+    }
+
+    public TileState? GetCollapsedState(float ratio)
     {
         float summedUpWeight = 0;
-        float totalWeight = (float)Random.Shared.NextDouble() * TotalWeight;
+        float totalWeight = ratio * TotalWeight;
         foreach (var (weight, state) in PossibleStates)
         {
             summedUpWeight += weight;
 
             if (summedUpWeight > totalWeight)
             {
-                CollapsedState = state;
-                return true;
+                return state;
             }
         }
 
-        return false;
+        return null;
     }
 
     private void UpdateEntropy()

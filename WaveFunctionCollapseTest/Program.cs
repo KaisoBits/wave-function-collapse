@@ -3,6 +3,8 @@ using SFML.System;
 using SFML.Window;
 using WaveFunctionCollapseTest;
 
+Clock clock = new();
+
 Vector2u atlasSize = new(12, 21);
 Vector2u gridSize = new(70, 70);
 Texture tex = new("Resources/tilemap.png");
@@ -11,7 +13,7 @@ RenderWindow window = new(new VideoMode(1600, 1280), "Wave function collapse");
 View view = new(new Vector2f(), new Vector2f(1600, 1280));
 window.SetView(view);
 
-Tilemap tilemap = new(tex, atlasSize, gridSize);
+Tilemap tilemap = new(tex, atlasSize, gridSize, clock);
 
 window.SetKeyRepeatEnabled(true);
 window.Resized += (s, e) => window.SetView(new View(new Vector2f(), new Vector2f(e.Width, e.Height)));
@@ -33,7 +35,7 @@ window.KeyPressed += (s, e) =>
     }
 
     if (e.Code == Keyboard.Key.R)
-        tilemap = new(tex, atlasSize, gridSize);
+        tilemap = new(tex, atlasSize, gridSize, clock);
 };
 
 while (window.IsOpen)
