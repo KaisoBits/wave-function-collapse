@@ -117,9 +117,10 @@ public class Tilemap : Transformable, Drawable
         if (tile.IsCollapsed)
             throw new Exception("Can't draw collapsed tile as a possibility");
 
-        float ratio = (_clock.ElapsedTime.AsSeconds() * 1.5f) % 1;
+        float ratio = (_clock.ElapsedTime.AsSeconds() * 0.5f) % 1;
+        int index = (int)Math.Floor(ratio * tile.PossibleStates.Count);
 
-        TileState? currentlyShownState = tile.GetCollapsedState(ratio) ?? throw new Exception("Invalid state");
+        TileState currentlyShownState = tile.PossibleStates[index].State;
         Vector2f textureCoord = new(currentlyShownState.TextureCoord.X * _textureTileSize.X, currentlyShownState.TextureCoord.Y * _textureTileSize.Y);
 
         _vertexArray[0] = new Vertex(new Vector2f(_textureTileSize.X, 0), textureCoord + new Vector2f(_textureTileSize.X, 0));
@@ -130,7 +131,7 @@ public class Tilemap : Transformable, Drawable
 
         target.Draw(_vertexArray, states);
 
-        Color overlay = new(200, 0, 200, 100);
+        Color overlay = new(200, 0, 200, 50);
         _vertexArray[0] = new Vertex(new Vector2f(_textureTileSize.X, 0), overlay);
         _vertexArray[1] = new Vertex(new Vector2f(0, 0), overlay);
         _vertexArray[2] = new Vertex(new Vector2f(0, _textureTileSize.Y), overlay);
