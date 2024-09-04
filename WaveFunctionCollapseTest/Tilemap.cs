@@ -47,7 +47,9 @@ public class Tilemap : Transformable, Drawable
 
         _rectangleShape = new RectangleShape((Vector2f)_textureTileSize)
         {
-            FillColor = Color.Black
+            FillColor = new Color(200, 0, 200, 50),
+            OutlineColor = Color.Red,
+            OutlineThickness = -1
         };
 
         _text = new Text("", _font)
@@ -131,14 +133,8 @@ public class Tilemap : Transformable, Drawable
 
         target.Draw(_vertexArray, states);
 
-        Color overlay = new(200, 0, 200, 50);
-        _vertexArray[0] = new Vertex(new Vector2f(_textureTileSize.X, 0), overlay);
-        _vertexArray[1] = new Vertex(new Vector2f(0, 0), overlay);
-        _vertexArray[2] = new Vertex(new Vector2f(0, _textureTileSize.Y), overlay);
-        _vertexArray[3] = new Vertex(new Vector2f(_textureTileSize.X, _textureTileSize.Y), overlay);
-        states.Texture = null;
-
-        target.Draw(_vertexArray, states);
+        if (_lowestEntropySortedTiles[0] == tile)
+            target.Draw(_rectangleShape, states);
 
         _text.DisplayedString = tile.PossibleStates.Count.ToString();
         target.Draw(_text, states);
