@@ -26,7 +26,7 @@ public class Tile
     {
         List<(float Weight, TileState State)> result = [];
 
-        float roadWeight = 10.0f / ((float)Math.Pow(40.0f, neighbors.Count(n => n?.IsCollapsed == true && n.CollapsedState.HasFlag(TileFlags.IsRoad)) * 5 + 1));
+        float roadWeight = 10.0f / ((float)Math.Pow(61.5f, neighbors.Count(n => n?.IsCollapsed == true && n.CollapsedState.HasFlag(TileFlags.IsRoad)) * 5 + 1));
 
         result.Add((10, TileState.Grass));
         result.AddRange(TileState.AllStates
