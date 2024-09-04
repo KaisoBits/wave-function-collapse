@@ -32,8 +32,9 @@ public class Tile
         result.AddRange(TileState.AllStates
             .Where(s => s.HasFlag(TileFlags.IsRoad))
             .Select(s => (
-            Weight: s.HasFlag(TileFlags.IsRoad | TileFlags.ConnectsOnTop | TileFlags.ConnectsOnBottom) || s.HasFlag(TileFlags.IsRoad | TileFlags.ConnectsOnRight | TileFlags.ConnectsOnLeft) ?
-                roadWeight * 10 : roadWeight,
+            Weight: s.HasFlag(TileFlags.IsRoad | TileFlags.ConnectsOnTop | TileFlags.ConnectsOnBottom) || 
+                    s.HasFlag(TileFlags.IsRoad | TileFlags.ConnectsOnRight | TileFlags.ConnectsOnLeft) 
+                    ? roadWeight * 10 : roadWeight,
             State: s))
         );
 
