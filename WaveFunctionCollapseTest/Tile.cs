@@ -26,16 +26,21 @@ public class Tile
     {
         List<(float Weight, TileState State)> result = [];
 
-        float roadWeight = 10.0f / ((float)Math.Pow(61.5f, neighbors.Count(n => n?.IsCollapsed == true && n.CollapsedState.HasFlag(TileFlags.IsRoad)) * 5 + 1));
+        float roadWeight = 1.0f / ((float)Math.Pow(neighbors.Count(n => n?.IsCollapsed == true && n.CollapsedState.HasFlag(TileFlags.IsRoad)) + 1, 3));
 
-        result.Add((10, TileState.Grass));
+        result.Add((40, TileState.Grass));
         result.AddRange(TileState.AllStates
             .Where(s => s.HasFlag(TileFlags.IsRoad))
-            .Select(s => (
-            Weight: s.HasFlag(TileFlags.IsRoad | TileFlags.ConnectsOnTop | TileFlags.ConnectsOnBottom) || 
-                    s.HasFlag(TileFlags.IsRoad | TileFlags.ConnectsOnRight | TileFlags.ConnectsOnLeft) 
-                    ? roadWeight * 10 : roadWeight,
-            State: s))
+            .Select(s =>
+            {
+                float weight = roadWeight;
+                if (s == TileState.RoadVertMid || s == TileState.RoadHorMid)
+                    weight *= 10;
+                else if (s == TileState.RoadVertTop || s == TileState.RoadVertBottom || s == TileState.RoadHorLeft || s == TileState.RoadHorRight)
+                    weight *= 0.1f;
+
+                return (Weight: weight, State: s);
+            })
         );
 
         if (neighbors.Right is { IsCollapsed: true })
@@ -43,7 +48,7 @@ public class Tile
             if (neighbors.Right.CollapsedState.HasFlag(TileFlags.IsRoad | TileFlags.ConnectsOnLeft))
                 result.RemoveAll(r => !r.State.HasFlag(TileFlags.ConnectsOnRight));
             else
-                result.RemoveAll(r => r.State.HasFlag(TileFlags.ConnectsOnRight));
+                result.RemoveAll(r => r.State.HasFlag(TileFlags.IsRoad) && r.State.HasFlag(TileFlags.ConnectsOnRight));
         }
 
         if (neighbors.Up is { IsCollapsed: true })
@@ -51,7 +56,7 @@ public class Tile
             if (neighbors.Up.CollapsedState.HasFlag(TileFlags.IsRoad | TileFlags.ConnectsOnBottom))
                 result.RemoveAll(r => !r.State.HasFlag(TileFlags.ConnectsOnTop));
             else
-                result.RemoveAll(r => r.State.HasFlag(TileFlags.ConnectsOnTop));
+                result.RemoveAll(r => r.State.HasFlag(TileFlags.IsRoad) && r.State.HasFlag(TileFlags.ConnectsOnTop));
         }
 
         if (neighbors.Bottom is { IsCollapsed: true })
@@ -59,7 +64,7 @@ public class Tile
             if (neighbors.Bottom.CollapsedState.HasFlag(TileFlags.IsRoad | TileFlags.ConnectsOnTop))
                 result.RemoveAll(r => !r.State.HasFlag(TileFlags.ConnectsOnBottom));
             else
-                result.RemoveAll(r => r.State.HasFlag(TileFlags.ConnectsOnBottom));
+                result.RemoveAll(r => r.State.HasFlag(TileFlags.IsRoad) && r.State.HasFlag(TileFlags.ConnectsOnBottom));
         }
 
         if (neighbors.Left is { IsCollapsed: true })
@@ -67,7 +72,7 @@ public class Tile
             if (neighbors.Left.CollapsedState.HasFlag(TileFlags.IsRoad | TileFlags.ConnectsOnRight))
                 result.RemoveAll(r => !r.State.HasFlag(TileFlags.ConnectsOnLeft));
             else
-                result.RemoveAll(r => r.State.HasFlag(TileFlags.ConnectsOnLeft));
+                result.RemoveAll(r => r.State.HasFlag(TileFlags.IsRoad) && r.State.HasFlag(TileFlags.ConnectsOnLeft));
 
         }
 
