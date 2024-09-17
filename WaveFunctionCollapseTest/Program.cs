@@ -81,18 +81,6 @@ window.KeyPressed += (s, e) =>
 
     if (e.Code == Keyboard.Key.R)
         tilemap = new(tex, atlasSize, gridSize, clock);
-
-
-    if (e.Code == Keyboard.Key.PageDown)
-    {
-        view.Zoom(1.25f);
-        window.SetView(view);
-    }
-    else if (e.Code == Keyboard.Key.PageUp)
-    {
-        view.Zoom(0.8f);
-        window.SetView(view);
-    }
 };
 
 while (window.IsOpen)
