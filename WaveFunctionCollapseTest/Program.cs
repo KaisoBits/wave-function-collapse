@@ -70,7 +70,7 @@ window.KeyPressed += (s, e) =>
     {
         if (e.Control)
         {
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 100; i++)
                 tilemap.Tick();
         }
         else
